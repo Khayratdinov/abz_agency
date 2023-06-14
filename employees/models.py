@@ -11,7 +11,10 @@ class Employee(models.Model):
     manager = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True
     )
-    employee_level = models.PositiveIntegerField(default=1)
+    employee_level = models.PositiveIntegerField()
 
     def __str__(self):
         return self.full_name
+
+    def get_position_display(self):
+        return f"{self.position} ({self.full_name})"
