@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <h1 class="text-center mb-5">Каталог сотрудников</h1>
+
+    <form id="filter-form" class="mb-3">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" name="search" id="search" class="form-control" placeholder="Search...">
+            </div>
+            <div class="col-md-3">
+                <select name="sort" id="sort" class="form-control">
+                    <option value="full_name">Full Name</option>
+                    <option value="position">Position</option>
+                    <option value="hire_date">Hire Date</option>
+                    <option value="salary">Salary</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Sort/Search</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table" id="employee-table">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Position</th>
+                <th>Hire Date</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>{{ employee.full_name }}</td>
+                <td>{{ employee.position }}</td>
+                <td>{{ employee.hire_date }}</td>
+                <td>{{ employee.salary }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No employees found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        loadEmployees();
+
+        $('#filter-form').on('submit', function (event) {
+            event.preventDefault();
+            loadEmployees();
+        });
+
+        function loadEmployees() {
+            var sortField = $('#sort').val();
+            var searchQuery = $('#search').val();
+
+            $.ajax({
+                url: '{% url "employee_list_ajax" %}',
+                data: {
+                    sort: sortField,
+                    search: searchQuery
+                },
+                dataType: 'json',
+                success: function (response) {
+                    var employees = response.employees;
+                    var tbody = $('#employee-table tbody');
+                    tbody.empty();
+
+                    if (employees.length > 0) {
+                        $.each(employees, function (index, employee) {
+                            var row = $('<tr>');
+                            row.append($('<td>').text(employee.full_name));
+                            row.append($('<td>').text(employee.position));
+                            row.append($('<td>').text(employee.hire_date));
+                            row.append($('<td>').text(employee.salary));
+                            tbody.append(row);
+                        });
+                    } else {
+                        var row = $('<tr>');
+                        row.append($('<td colspan="4">').text('No employees found.'));
+                        tbody.append(row);
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
