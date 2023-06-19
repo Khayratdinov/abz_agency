@@ -8,6 +8,10 @@ def index(request):
     return render(request, "index.html")
 
 
+def task_list(request):
+    return render(request, "task_list.html")
+
+
 def employee_list(request):
     return render(request, "employee_list.html")
 
