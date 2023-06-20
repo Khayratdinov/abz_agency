@@ -1,0 +1,22 @@
+body {
+    height: 80vh;
+}
+
+.form-control:focus {
+    border-color: #052c49;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background-color: #052c49;
+    border-color: #052c49;
+}
+
+.btn-primary:hover {
+    background-color: #052c49;
+    border-color: #052c49;
+}
+
+.form-floating label {
+    color: #052c49;
+}

@@ -9,18 +9,18 @@
     <form id="filter-form" class="mb-3">
         <div class="row">
             <div class="col-md-6">
-                <input type="text" name="search" id="search" class="form-control" placeholder="Search...">
+                <input type="text" name="search" id="search" class="form-control" placeholder="Поиск...">
             </div>
             <div class="col-md-3">
                 <select name="sort" id="sort" class="form-control">
-                    <option value="full_name">Full Name</option>
-                    <option value="position">Position</option>
-                    <option value="hire_date">Hire Date</option>
-                    <option value="salary">Salary</option>
+                    <option value="full_name">Полное имя</option>
+                    <option value="position">Позиция</option>
+                    <option value="hire_date">Дата приема на работу</option>
+                    <option value="salary">Зарплата</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">Sort/Search</button>
+                <button type="submit" class="btn btn-primary">Сортировать / Поиск</button>
             </div>
         </div>
     </form>
@@ -28,10 +28,10 @@
     <table class="table" id="employee-table">
         <thead>
             <tr>
-                <th>Full Name</th>
-                <th>Position</th>
-                <th>Hire Date</th>
-                <th>Salary</th>
+                <th>Полное имя</th>
+                <th>Позиция</th>
+                <th>Дата приема на работу</th>
+                <th>Зарплата</th>
             </tr>
         </thead>
         <tbody>
@@ -40,11 +40,11 @@
                 <td>{{ employee.full_name }}</td>
                 <td>{{ employee.position }}</td>
                 <td>{{ employee.hire_date }}</td>
-                <td>{{ employee.salary }}</td>
+                <td>{{ employee.salary }} $</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4">No employees found.</td>
+                <td colspan="4">Сотрудников не обнаружено.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -85,12 +85,12 @@
                             row.append($('<td>').text(employee.full_name));
                             row.append($('<td>').text(employee.position));
                             row.append($('<td>').text(employee.hire_date));
-                            row.append($('<td>').text(employee.salary));
+                            row.append($('<td>').text(employee.salary + ' $'));
                             tbody.append(row);
                         });
                     } else {
                         var row = $('<tr>');
-                        row.append($('<td colspan="4">').text('No employees found.'));
+                        row.append($('<td colspan="4">').text('Сотрудников не обнаружено.'));
                         tbody.append(row);
                     }
                 }
