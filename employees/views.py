@@ -16,11 +16,12 @@ def task_list(request):
     return render(request, "task_list.html")
 
 
-@login_required
+@login_required(login_url="login")
 def employee_list(request):
     return render(request, "employee_list.html")
 
 
+@login_required
 def employee_list_ajax(request):
     print(request.GET)
     sort_field = request.GET.get("sort", "full_name")
@@ -50,8 +51,6 @@ def employee_list_ajax(request):
 
 
 def signup_view(request):
-    print("HELLO")
-    print(request.method)
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
