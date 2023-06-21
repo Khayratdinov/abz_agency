@@ -1,11 +1,14 @@
-from django.shortcuts import render
-from .models import Employee
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
-from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
+
+from .models import Employee
+from .forms import EmployeeForm
 
 
 def index(request):
@@ -37,6 +40,7 @@ def employee_list_ajax(request):
     for employee in employees:
         data.append(
             {
+                "pk": employee.id,
                 "full_name": employee.full_name,
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
@@ -45,6 +49,23 @@ def employee_list_ajax(request):
         )
 
     return JsonResponse({"employees": data})
+
+
+@login_required
+def get_employee_data(request):
+    employee_id = request.GET.get("employee_id")
+    employee = get_object_or_404(Employee, id=employee_id)
+
+    # Prepare the employee data to be sent back as JSON
+    employee_data = {
+        "employee_id": employee_id,
+        "full_name": employee.full_name,
+        "position": employee.position,
+        "hire_date": employee.hire_date,
+        "salary": employee.salary,
+    }
+
+    return JsonResponse({"employee": employee_data})
 
 
 # ============================================================================ #
@@ -77,3 +98,61 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
+
+
+# ============================================================================ #
+
+
+@login_required
+def create_employee(request):
+    if request.method == "POST":
+        form = EmployeeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("employee_list")
+    else:
+        form = EmployeeForm()
+    return render(request, "create_employee.html", {"form": form})
+
+
+# ============================================================================ #
+
+
+@login_required
+def employee_detail_ajax(request, employee_id):
+    employee = get_object_or_404(Employee, pk=employee_id)
+    return JsonResponse(
+        {
+            "employee": {
+                "pk": employee.pk,
+                "full_name": employee.full_name,
+                "position": employee.position,
+                "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
+                "salary": employee.salary,
+            }
+        }
+    )
+
+
+@login_required
+@csrf_exempt
+def employee_update_ajax(request, employee_id):
+    employee = get_object_or_404(Employee, pk=employee_id)
+    if request.method == "POST":
+        employee.full_name = request.POST.get("full_name", employee.full_name)
+        employee.position = request.POST.get("position", employee.position)
+        employee.hire_date = request.POST.get("hire_date", employee.hire_date)
+        employee.salary = request.POST.get("salary", employee.salary)
+        employee.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})
+
+
+@login_required
+@csrf_exempt
+def employee_delete_ajax(request, employee_id):
+    employee = get_object_or_404(Employee, pk=employee_id)
+    if request.method == "POST":
+        employee.delete()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False})

@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 # Create your models here.
 
@@ -18,3 +19,6 @@ class Employee(models.Model):
 
     def get_position_display(self):
         return f"{self.position} ({self.full_name})"
+
+    def get_edit_url(self):
+        return reverse("update_employee", args=[self.id])
