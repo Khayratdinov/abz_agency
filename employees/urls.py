@@ -12,10 +12,20 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     # path("employee/create/", views.create_employee, name="create_employee"),
     path(
-        "employee_delete_ajax/<int:employee_id>/", views.employee_delete_ajax, name="employee_delete_ajax"
+        "employee_delete_ajax/<int:employee_id>/",
+        views.employee_delete_ajax,
+        name="employee_delete_ajax",
     ),
     path(
-        "employee_update_ajax/<int:employee_id>/", views.employee_update_ajax, name="employee_update_ajax"
+        "employee_update_ajax/<int:employee_id>/",
+        views.employee_update_ajax,
+        name="employee_update_ajax",
     ),
-    path("employee_detail_ajax/<int:employee_id>/", views.employee_detail_ajax, name="employee_detail_ajax"),
+    path(
+        "employee_detail_ajax/<int:employee_id>/",
+        views.employee_detail_ajax,
+        name="employee_detail_ajax",
+    ),
+    path("create_employee/", views.create_employee, name="create_employee"),
+    path("save-employee-ajax/", views.save_employee_ajax, name="save_employee_ajax"),
 ]

@@ -26,7 +26,8 @@
                 <a class="navbar-brand" href="{% url 'index' %}">Employee</a>
                 {% if request.user.is_authenticated %}
                 <div>
-                    <a href="#" type="button" class="btn btn-outline-primary me-2">Профиль</a>
+                    <a id="add_employee" href="#" type="button" class="btn btn-success me-2">Добавить
+                        сотрудника</a>
                     <a href="{% url 'logout' %}" type="button" class="btn btn-outline-primary me-2">Выйти</a>
                 </div>
 

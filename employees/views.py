@@ -21,7 +21,11 @@ def task_list(request):
 
 @login_required(login_url="login")
 def employee_list(request):
-    return render(request, "employee_list.html")
+    employees_for_create = Employee.objects.all()
+
+    return render(
+        request, "employee_list.html", {"employees_for_create": employees_for_create}
+    )
 
 
 @login_required
@@ -69,6 +73,21 @@ def get_employee_data(request):
 
 
 # ============================================================================ #
+
+# Create employee
+
+
+@login_required
+def employee_create(request):
+    if request.method == "POST":
+        form = EmployeeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("employee_list")
+    else:
+        form = EmployeeForm()
+    context = {"form": form}
+    return render(request, "create_employee.html", context)
 
 
 def signup_view(request):
@@ -156,3 +175,16 @@ def employee_delete_ajax(request, employee_id):
         employee.delete()
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
+
+
+@csrf_exempt
+def save_employee_ajax(request):
+    form = EmployeeForm(request.POST or None)
+
+    print(form.errors)
+
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"success": True})
+    else:
+        return JsonResponse({"success": False, "error": form.errors})
