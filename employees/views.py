@@ -188,3 +188,16 @@ def save_employee_ajax(request):
         return JsonResponse({"success": True})
     else:
         return JsonResponse({"success": False, "error": form.errors})
+
+
+def autocomplete(request):
+    if "term" in request.GET:
+        term = request.GET.get("term")
+        languages = Employee.objects.all().filter(full_name__icontains=term)
+        print("HELLLRLRL", list(languages.values()))
+        return JsonResponse(list(languages.values()), safe=False)
+    return render(request, "employee_list.html")
+
+
+def test(request):
+    return render(request, "test.html")

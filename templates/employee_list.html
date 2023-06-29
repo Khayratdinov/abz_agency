@@ -3,55 +3,6 @@
 {% block content %}
 
 <div class="container mt-5">
-    <div class="modal fade" id="add-employee-modal" tabindex="-1" aria-labelledby="add-employee-modal-label"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="add-employee-modal-label">Add Employee</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="add-employee-form">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="full-name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" name="full_name" id="full-name">
-                        </div>
-                        <div class="mb-3">
-                            <label for="position" class="form-label">Position</label>
-                            <input type="text" class="form-control" name="position" id="position">
-                        </div>
-                        <div class="mb-3">
-                            <label for="hire-date" class="form-label">Hire Date</label>
-                            <input type="date" class="form-control" name="hire_date" id="hire-date">
-                        </div>
-                        <div class="mb-3">
-                            <label for="salary" class="form-label">Salary</label>
-                            <input type="number" step="0.01" class="form-control" name="salary" id="salary">
-                        </div>
-                        <input type="hidden" name="employee_level" value="1">
-                        <div class="col-md-12 mb-3">
-                            <div class="form-group">
-                                <label for="sel1">Select Manager:</label>
-                                <select class="form-control" id="sel1">
-                                    {% for employee in employees_for_create %}
-                                    <option value="{{ employee.id }}">{{ employee.full_name }}</option>
-                                    {% endfor %}
-                                </select>
-
-                            </div>
-
-
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!--  Create employee with modal  -->
 
     <h1 class="text-center mb-5">Каталог сотрудников</h1>
@@ -144,6 +95,46 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="add-employee-modal" tabindex="-1" aria-labelledby="add-employee-modal-label"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-employee-modal-label">Add Employee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-employee-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="full-name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name" id="full-name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="position" class="form-label">Position</label>
+                        <input type="text" class="form-control" name="position" id="position">
+                    </div>
+                    <div class="mb-3">
+                        <label for="hire-date" class="form-label">Hire Date</label>
+                        <input type="date" class="form-control" name="hire_date" id="hire-date">
+                    </div>
+                    <div class="mb-3">
+                        <label for="salary" class="form-label">Salary</label>
+                        <input type="number" step="0.01" class="form-control" name="salary" id="salary">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="sel1">Select Manager:</label>
+                        <select class="form-control " id="my-select"></select>
+                    </div>
+                    <input type="hidden" name="employee_level" value="1">
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Delete employee modal -->
 <div class="modal fade" id="delete-employee-modal" tabindex="-1" aria-labelledby="delete-employee-modal-label"
     aria-hidden="true">
@@ -168,6 +159,30 @@
 
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#my-select').select2({
+            ajax: {
+                url: '{% url "autocomplete" %}',
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return { id: item.id, text: [item.full_name, " - ", item.position] };
+                        })
+                    };
+                }
+            },
+            minimumInputLength: 3,
+            dropdownParent: '#add-employee-modal',
+            width: '100%',
+
+
+        });
+    });
+</script>
 <script>
     $(document).ready(function () {
         loadEmployees();
@@ -257,6 +272,51 @@
                         }
                     }
                 });
+            }
+        });
+
+
+
+
+        $('#manager-select').select2({
+            ajax: {
+                url: '{% url "autocomplete" %}',
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return { id: item.id, full_name: item.full_name };
+                        })
+                    };
+                }
+            },
+            minimumInputLength: 1
+        });
+
+        $(".profiles-thread").select2({
+            minimumInputLength: 2,
+            tags: [],
+            ajax: {
+                url: '{% url "autocomplete" %}',
+                dataType: 'json',
+                type: "GET",
+                quietMillis: 50,
+                data: function (term) {
+                    return {
+                        term: term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.completeName,
+                                slug: item.slug,
+                                id: item.id
+                            }
+                        })
+                    };
+                }
             }
         });
 
