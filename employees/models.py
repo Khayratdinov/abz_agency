@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
@@ -12,7 +13,9 @@ class Employee(models.Model):
     manager = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True
     )
-    employee_level = models.PositiveIntegerField()
+    employee_level = models.PositiveIntegerField(
+        validators=[MaxValueValidator(5), MinValueValidator(1)]
+    )
 
     def __str__(self):
         return self.full_name

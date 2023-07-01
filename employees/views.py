@@ -6,9 +6,12 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
+# ============================================================================ #
 
 from .models import Employee
 from .forms import EmployeeForm
+
+# ============================================================================ #
 
 
 def index(request):
@@ -17,6 +20,10 @@ def index(request):
 
 def task_list(request):
     return render(request, "task_list.html")
+
+
+def test(request):
+    return render(request, "test.html")
 
 
 @login_required(login_url="login")
@@ -30,7 +37,6 @@ def employee_list(request):
 
 @login_required
 def employee_list_ajax(request):
-    print(request.GET)
     sort_field = request.GET.get("sort", "full_name")
     search_query = request.GET.get("search", "")
 
@@ -148,6 +154,7 @@ def employee_detail_ajax(request, employee_id):
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
                 "salary": employee.salary,
+                "employee_level": employee.employee_level,
             }
         }
     )
@@ -162,6 +169,9 @@ def employee_update_ajax(request, employee_id):
         employee.position = request.POST.get("position", employee.position)
         employee.hire_date = request.POST.get("hire_date", employee.hire_date)
         employee.salary = request.POST.get("salary", employee.salary)
+        employee.employee_level = request.POST.get(
+            "employee_level", employee.employee_level
+        )
         employee.save()
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
@@ -194,10 +204,5 @@ def autocomplete(request):
     if "term" in request.GET:
         term = request.GET.get("term")
         languages = Employee.objects.all().filter(full_name__icontains=term)
-        print("HELLLRLRL", list(languages.values()))
         return JsonResponse(list(languages.values()), safe=False)
     return render(request, "employee_list.html")
-
-
-def test(request):
-    return render(request, "test.html")
