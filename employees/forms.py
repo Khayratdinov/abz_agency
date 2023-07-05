@@ -10,6 +10,7 @@ class EmployeeForm(forms.ModelForm):
             "position",
             "hire_date",
             "salary",
+            "image",
             "manager",
             "employee_level",
         )
@@ -18,6 +19,7 @@ class EmployeeForm(forms.ModelForm):
             "position": forms.TextInput(attrs={"class": "form-control"}),
             "hire_date": forms.DateInput(attrs={"class": "form-control"}),
             "salary": forms.NumberInput(attrs={"class": "form-control"}),
+            "image": forms.FileInput(attrs={"class": "form-control"}),
             "manager": forms.Select(attrs={"class": "form-control"}),
             "employee_level": forms.Select(attrs={"class": "form-control"}),
         }

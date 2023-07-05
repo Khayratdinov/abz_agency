@@ -131,7 +131,7 @@ def logout_view(request):
 @login_required
 def create_employee(request):
     if request.method == "POST":
-        form = EmployeeForm(request.POST)
+        form = EmployeeForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect("employee_list")
@@ -154,6 +154,7 @@ def employee_detail_ajax(request, employee_id):
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
                 "salary": employee.salary,
+                "image": employee.image,
                 "employee_level": employee.employee_level,
             }
         }
@@ -189,11 +190,14 @@ def employee_delete_ajax(request, employee_id):
 
 @csrf_exempt
 def save_employee_ajax(request):
-    form = EmployeeForm(request.POST or None)
+    print("This hello 1", request.POST)
+    form = EmployeeForm(request.POST or None, request.FILES)
 
     print(form.errors)
 
     if form.is_valid():
+        # if request.FILES.get("image"):
+        #     form.instance.image = request.FILES.get("image")
         form.save()
         return JsonResponse({"success": True})
     else:
