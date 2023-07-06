@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 
 {% block header-action %}
 
@@ -37,7 +37,7 @@
     <table class="table" id="employee-table">
         <thead>
             <tr>
-
+                <th>Photo</th>
                 <th>Полное имя</th>
                 <th>Позиция</th>
                 <th>Дата приема на работу</th>
@@ -48,6 +48,8 @@
         <tbody>
             {% for employee in employees %}
             <tr>
+
+                <td></td>
 
                 <td>{{ employee.full_name }}</td>
                 <td>{{ employee.position }}</td>
@@ -291,7 +293,7 @@
                 success: function (response) {
                     if (response.success) {
                         $('#add-employee-modal').modal('hide');
-                        console.log(formData);
+
 
                         loadEmployees();
                     } else {
@@ -408,6 +410,8 @@
                     if (employees.length > 0) {
                         employees.forEach(function (employee) {
                             var row = $('<tr>');
+                            var low_image = $('<img>').attr('src', employee.low_image).addClass('table-image');
+                            row.append($('<td>').append(low_image));
                             row.append($('<td>').text(employee.full_name));
                             row.append($('<td>').text(employee.position));
                             row.append($('<td>').text(employee.hire_date));

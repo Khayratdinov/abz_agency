@@ -1,4 +1,4 @@
-body {
+/* body {
     height: 80vh;
 }
 
@@ -19,4 +19,9 @@ body {
 
 .form-floating label {
     color: #052c49;
+} */
+
+.table-image {
+    width: 50px;
+    border-radius: 50px;
 }

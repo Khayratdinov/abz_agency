@@ -10,6 +10,29 @@
 
     <body>
 
+
+        {% for employee in emplote_list %}
+        {% if employee.low_image %}
+
+
+        {{ employee.full_name }}
+        <img src="{{ employee.low_image.url }}" alt="">
+
+        <hr>
+
+        <img src="{{ employee.image.url }}" alt="">
+
+        {% endif %}
+
+
+
+
+
+
+
+        {% endfor %}
+
+
     </body>
 
 </html>

@@ -23,7 +23,9 @@ def task_list(request):
 
 
 def test(request):
-    return render(request, "test.html")
+    emplote_list = Employee.objects.all()
+
+    return render(request, "test.html", {"emplote_list": emplote_list})
 
 
 @login_required(login_url="login")
@@ -55,6 +57,7 @@ def employee_list_ajax(request):
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
                 "salary": str(employee.salary),
+                "low_image": employee.low_image.url if employee.low_image else "",
             }
         )
 
@@ -154,7 +157,7 @@ def employee_detail_ajax(request, employee_id):
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
                 "salary": employee.salary,
-                "image": employee.image,
+                "low_image": employee.low_image,
                 "employee_level": employee.employee_level,
             }
         }
@@ -173,6 +176,7 @@ def employee_update_ajax(request, employee_id):
         employee.employee_level = request.POST.get(
             "employee_level", employee.employee_level
         )
+        employee.image = request.FILES.get("image", employee.image)
         employee.save()
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
