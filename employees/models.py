@@ -41,15 +41,9 @@ class Employee(models.Model):
 
             # Снижаем качество изображения
             output_io = BytesIO()
-            #  image size 200x200
             img.thumbnail(
-                (
-                    200,
-                    200,
-                ),
-                # Image.ANTIALIAS,
+                (200, 200),
             )
-
             img.save(
                 output_io,
                 format="JPEG",

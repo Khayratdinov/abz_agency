@@ -100,7 +100,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="image" class="form-label">Image</label>
-                        <input type="file" class="form-control" name="image" id="image">
+                        <input type="file" class="form-control" name="image" id="employee-image-edit">
                     </div>
 
                     <div class="form-group mb-3">
@@ -254,6 +254,8 @@
         $('#employee-table').on('click', '.edit-employee', function (event) {
             event.preventDefault();
             var employeeId = $(this).data('employee');
+
+
             $.ajax({
                 url: '{% url "employee_detail_ajax" 0 %}'.replace('0', employeeId),
                 dataType: 'json',
@@ -266,6 +268,18 @@
                     $('#image').val(response.employee.image);
                     $('#employee_level').val(response.employee.employee_level);
                     $('#edit-employee-modal').modal('show');
+
+                    // $('#image').val('');
+
+                    // // Show a preview of the current image (if available)
+                    // if (response.employee.image) {
+                    //     var imagePreview = $('<img>').attr('src', response.employee.image).addClass('image-preview');
+                    //     $('#image-preview-container').html(imagePreview);
+                    // } else {
+                    //     $('#image-preview-container').html('');
+                    // }
+
+                    // $('#edit-employee-modal').modal('show');
                 }
             });
         });
@@ -306,10 +320,16 @@
         $('#edit-employee-form').on('submit', function (event) {
             event.preventDefault();
             var employeeId = $('#employee-id').val();
+            var formData = new FormData(this);
+            var employeeImage = $('#employee-image-edit').get(0).files[0];
+            formData.append('employee_image', employeeImage);
+
             $.ajax({
                 url: '{% url "employee_update_ajax" 0 %}'.replace('0', employeeId),
                 method: 'POST',
-                data: $(this).serialize(),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function (response) {
                     if (response.success) {
                         $('#edit-employee-modal').modal('hide');

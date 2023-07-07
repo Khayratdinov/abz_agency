@@ -157,7 +157,7 @@ def employee_detail_ajax(request, employee_id):
                 "position": employee.position,
                 "hire_date": employee.hire_date.strftime("%Y-%m-%d"),
                 "salary": employee.salary,
-                "low_image": employee.low_image,
+                "image": employee.image.url if employee.image else None,
                 "employee_level": employee.employee_level,
             }
         }
