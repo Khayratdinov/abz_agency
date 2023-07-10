@@ -26,7 +26,6 @@ urlpatterns = [
         views.employee_detail_ajax,
         name="employee_detail_ajax",
     ),
-    path("create_employee/", views.create_employee, name="create_employee"),
     path("save-employee-ajax/", views.save_employee_ajax, name="save_employee_ajax"),
     path("autocomplete/", views.autocomplete, name="autocomplete"),
 

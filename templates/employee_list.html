@@ -68,7 +68,12 @@
             {% endfor %}
         </tbody>
     </table>
+
 </div>
+
+<nav id="pagination">
+    <ul class="pagination justify-content-center"></ul>
+</nav>
 
 <!-- Edit employee modal -->
 <div class="modal fade" id="edit-employee-modal" tabindex="-1" aria-labelledby="edit-employee-modal-label"
@@ -233,8 +238,6 @@
             minimumInputLength: 3,
             dropdownParent: '#edit-employee-modal',
             width: '100%',
-
-
         });
 
     });
@@ -242,13 +245,10 @@
 
 <script>
     $(document).ready(function () {
-        loadEmployees();
-
-
-
+        loadEmployees(1);
         $('#filter-form').on('submit', function (event) {
             event.preventDefault();
-            loadEmployees();
+            loadEmployees(1);
         });
 
         $('#employee-table').on('click', '.edit-employee', function (event) {
@@ -268,18 +268,6 @@
                     $('#image').val(response.employee.image);
                     $('#employee_level').val(response.employee.employee_level);
                     $('#edit-employee-modal').modal('show');
-
-                    // $('#image').val('');
-
-                    // // Show a preview of the current image (if available)
-                    // if (response.employee.image) {
-                    //     var imagePreview = $('<img>').attr('src', response.employee.image).addClass('image-preview');
-                    //     $('#image-preview-container').html(imagePreview);
-                    // } else {
-                    //     $('#image-preview-container').html('');
-                    // }
-
-                    // $('#edit-employee-modal').modal('show');
                 }
             });
         });
@@ -365,9 +353,6 @@
             }
         });
 
-
-
-
         $('#manager-select').select2({
             ajax: {
                 url: '{% url "autocomplete" %}',
@@ -410,41 +395,71 @@
             }
         });
 
+        // Pagination handlers
+        $(document).on('click', '.page-link', function (event) {
+            event.preventDefault();
+            var pageNumber = parseInt($(this).data('page'));
+            loadEmployees(pageNumber);
+        });
 
-        function loadEmployees() {
+        function loadEmployees(pageNumber) {
             var sortField = $('#sort').val();
             var searchQuery = $('#search').val();
 
             $.ajax({
-                url: '{% url "employee_list_ajax" %}',
+                url: '/employee_list_ajax/',
                 data: {
+                    page: pageNumber,
                     sort: sortField,
                     search: searchQuery
                 },
                 dataType: 'json',
                 success: function (response) {
                     var employees = response.employees;
+                    var totalPages = response.total_pages;
+                    var currentPage = response.current_page;
+
                     var tbody = $('#employee-table tbody');
                     tbody.empty();
 
                     if (employees.length > 0) {
                         employees.forEach(function (employee) {
                             var row = $('<tr>');
-                            var low_image = $('<img>').attr('src', employee.low_image).addClass('table-image');
-                            row.append($('<td>').append(low_image));
+                            var image = $('<img>').attr('src', employee.photo).addClass('table-image');
+                            row.append($('<td>').append(image));
                             row.append($('<td>').text(employee.full_name));
                             row.append($('<td>').text(employee.position));
                             row.append($('<td>').text(employee.hire_date));
-                            row.append($('<td>').text(employee.salary + ' $'));
-                            var editButton = $('<a>').attr('href', '#').addClass('btn btn-primary me-3 edit-employee').attr('data-employee', employee.pk).text('Редактировать');
-                            var deleteButton = $('<a>').attr('href', '#').addClass('btn btn-danger delete-employee').attr('data-employee', employee.pk).text('Удалить');
+                            row.append($('<td>').text(employee.salary));
+                            var editButton = $('<a>').attr('href', '#').addClass('btn btn-primary me-3 edit-employee').attr('data-employee', employee.pk).text('Edit');
+                            var deleteButton = $('<a>').attr('href', '#').addClass('btn btn-danger delete-employee').attr('data-employee', employee.pk).text('Delete');
                             row.append($('<td>').append(editButton, deleteButton));
                             tbody.append(row);
                         });
                     } else {
                         var row = $('<tr>');
-                        row.append($('<td colspan="4">').text('Сотрудников не обнаружено.'));
+                        row.append($('<td colspan="4">').text('No employees found.'));
                         tbody.append(row);
+                    }
+
+                    // Update pagination links
+                    var pagination = $('#pagination ul');
+                    pagination.empty();
+
+                    if (totalPages > 0) {
+                        var prevPageLink = $('<a>').addClass('page-link').attr('href', '#').attr('data-page', currentPage - 1).text('Previous');
+                        var prevPageItem = $('<li>').addClass('page-item').addClass(currentPage === 1 ? 'disabled' : '').append(prevPageLink);
+                        pagination.append(prevPageItem);
+
+                        for (var i = 1; i <= totalPages; i++) {
+                            var pageLink = $('<a>').addClass('page-link').attr('href', '#').attr('data-page', i).text(i);
+                            var pageItem = $('<li>').addClass('page-item').addClass(i === currentPage ? 'active' : '').append(pageLink);
+                            pagination.append(pageItem);
+                        }
+
+                        var nextPageLink = $('<a>').addClass('page-link').attr('href', '#').attr('data-page', currentPage + 1).text('Next');
+                        var nextPageItem = $('<li>').addClass('page-item').addClass(currentPage === totalPages ? 'disabled' : '').append(nextPageLink);
+                        pagination.append(nextPageItem);
                     }
                 }
             });

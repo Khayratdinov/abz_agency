@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
 # ============================================================================ #
 
@@ -48,8 +49,14 @@ def employee_list_ajax(request):
         | Q(salary__icontains=search_query)
     ).order_by(sort_field)
 
+    # Paginate the results
+    page_number = request.GET.get("page", 1)
+    page_size = request.GET.get("page_size", 2)
+    paginator = Paginator(employees, page_size)
+    page = paginator.get_page(page_number)
+
     data = []
-    for employee in employees:
+    for employee in page:
         data.append(
             {
                 "pk": employee.id,
@@ -61,7 +68,16 @@ def employee_list_ajax(request):
             }
         )
 
-    return JsonResponse({"employees": data})
+    # Add pagination metadata to the response
+    return JsonResponse(
+        {
+            "employees": data,
+            "page_number": page_number,
+            "page_size": page_size,
+            "total_pages": paginator.num_pages,
+            "total_items": paginator.count,
+        }
+    )
 
 
 @login_required
@@ -82,21 +98,6 @@ def get_employee_data(request):
 
 
 # ============================================================================ #
-
-# Create employee
-
-
-@login_required
-def employee_create(request):
-    if request.method == "POST":
-        form = EmployeeForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("employee_list")
-    else:
-        form = EmployeeForm()
-    context = {"form": form}
-    return render(request, "create_employee.html", context)
 
 
 def signup_view(request):
@@ -126,21 +127,6 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
-
-
-# ============================================================================ #
-
-
-@login_required
-def create_employee(request):
-    if request.method == "POST":
-        form = EmployeeForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect("employee_list")
-    else:
-        form = EmployeeForm()
-    return render(request, "create_employee.html", {"form": form})
 
 
 # ============================================================================ #

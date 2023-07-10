@@ -36,3 +36,189 @@
     </body>
 
 </html>
+
+<!-- ======================================================================= -->
+
+<div class="container mt-5">
+
+    <h1 class="text-center mb-5">Каталог сотрудников</h1>
+
+    <form id="filter-form" class="mb-3">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" name="search" id="search" class="form-control" placeholder="Поиск...">
+            </div>
+            <div class="col-md-3">
+                <select name="sort" id="sort" class="form-control">
+                    <option value="full_name">Полное имя</option>
+                    <option value="position">Позиция</option>
+                    <option value="hire_date">Дата приема на работу</option>
+                    <option value="salary">Зарплата</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Сортировать / Поиск</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table" id="employee-table">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Полное имя</th>
+                <th>Позиция</th>
+                <th>Дата приема на работу</th>
+                <th>Зарплата</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+
+                <td></td>
+
+                <td>{{ employee.full_name }}</td>
+                <td>{{ employee.position }}</td>
+                <td>{{ employee.hire_date }}</td>
+                <td>{{ employee.salary }} $</td>
+                <td>
+                    <a href="#" class="btn btn-primary edit-employee"
+                        data-employee="{{ employee.pk }}">Редактировать</a>
+                    <a href="#" class="btn btn-danger delete-employee" data-employee="{{ employee.pk }}">Удалить</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Сотрудников не обнаружено.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <ul class="pagination" id="pagination"></ul>
+    </table>
+</div>
+
+<script>
+
+    $(document).on('click', '.page-link', function (event) {
+        event.preventDefault();
+        var page = $(this).attr('data-page');
+        loadEmployees(page);
+    });
+
+    $(document).ready(function () {
+        loadEmployees();
+        $('#filter-form').on('submit', function (event) {
+            event.preventDefault();
+            loadEmployees();
+        });
+
+
+        function loadEmployees(page = 1, page_size = 10) {
+            var sortField = $('#sort').val();
+            var searchQuery = $('#search').val();
+
+            $.ajax({
+                url: '{% url "employee_list_ajax" %}',
+                data: {
+                    sort: sortField,
+                    search: searchQuery,
+                    page: page,
+                    page_size: page_size
+                },
+                dataType: 'json',
+                success: function (response) {
+                    var employees = response.employees;
+                    var count = response.count;
+                    var totalPages = Math.ceil(count / page_size);
+                    var currentPage = page;
+
+                    var tbody = $('#employee-table tbody');
+                    tbody.empty();
+
+                    if (employees.length > 0) {
+                        employees.forEach(function (employee) {
+                            var row = $('<tr>');
+                            var low_image = $('<img>').attr('src', employee.low_image).addClass('table-image');
+                            row.append($('<td>').append(low_image));
+                            row.append($('<td>').text(employee.full_name));
+                            row.append($('<td>').text(employee.position));
+                            row.append($('<td>').text(employee.hire_date));
+                            row.append($('<td>').text(employee.salary + ' $'));
+                            var editButton = $('<a>').attr('href', '#').addClass('btn btn-primary me-3 edit-employee').attr('data-employee', employee.pk).text('Редактировать');
+                            var deleteButton = $('<a>').attr('href', '#').addClass('btn btn-danger delete-employee').attr('data-employee', employee.pk).text('Удалить');
+                            row.append($('<td>').append(editButton, deleteButton));
+                            tbody.append(row);
+                        });
+                    } else {
+                        var row = $('<tr>');
+                        row.append($('<td colspan="4">').text('Сотрудников не обнаружено.'));
+                        tbody.append(row);
+                    }
+
+                    // Add pagination links
+                    var pagination = $('#pagination');
+                    pagination.empty();
+                    if (totalPages > 1) {
+                        for (var i = 1; i <= totalPages; i++) {
+                            var pageLink = $('<a>').attr('href', '#').addClass('page-link').attr('data-page', i).text(i);
+                            var pageLi = $('<li>').addClass('page-item').append(pageLink);
+                            if (i == currentPage) {
+                                pageLi.addClass('active');
+                            }
+                            pagination.append(pageLi);
+                        }
+                        pagination.show();
+                    } else {
+                        pagination.hide();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+
+@login_required
+def employee_list_ajax(request):
+sort_field = request.GET.get("sort", "full_name")
+search_query = request.GET.get("search", "")
+
+employees = Employee.objects.filter(
+Q(full_name__icontains=search_query)
+| Q(position__icontains=search_query)
+| Q(salary__icontains=search_query)
+).order_by(sort_field)
+
+# Paginate the results
+page_number = request.GET.get("page", 1)
+page_size = request.GET.get("page_size", 2)
+paginator = Paginator(employees, page_size)
+page = paginator.get_page(page_number)
+
+data = []
+for employee in page:
+data.append(
+{
+"pk": employee.id,
+"full_name": employee.full_name,
+"position": employee.position,
+"hire_date": employee.hire_date.strftime("%Y-%m-%d"),
+"salary": str(employee.salary),
+"low_image": employee.low_image.url if employee.low_image else "",
+}
+)
+
+# Add pagination metadata to the response
+return JsonResponse(
+{
+"employees": data,
+"page_number": page_number,
+"page_size": page_size,
+"total_pages": paginator.num_pages,
+"total_items": paginator.count,
+}
+)
+
+i need pagination for employe list
