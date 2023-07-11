@@ -425,7 +425,7 @@
                     if (employees.length > 0) {
                         employees.forEach(function (employee) {
                             var row = $('<tr>');
-                            var image = $('<img>').attr('src', employee.photo).addClass('table-image');
+                            var image = $('<img>').attr('src', employee.low_image).addClass('table-image');
                             row.append($('<td>').append(image));
                             row.append($('<td>').text(employee.full_name));
                             row.append($('<td>').text(employee.position));
